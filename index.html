@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0b0d12">
+<title>VideoShare — Mobile Video App</title>
+<style>
+:root{
+  --bg:#080a0f;
+  --panel:#11141b;
+  --panel2:#171b24;
+  --text:#f5f7fb;
+  --muted:#8f98a8;
+  --line:#242a35;
+  --accent:#ff3158;
+  --accent2:#ff6a3d;
+  --white:#fff;
+  --radius:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#000;color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+body{min-height:100vh}
+button,input{font:inherit}
+button{border:0;color:inherit;cursor:pointer}
+.app{width:100%;max-width:560px;min-height:100vh;margin:auto;background:var(--bg);position:relative;overflow:hidden}
+.topbar{position:sticky;top:0;z-index:30;height:64px;padding:10px 16px;display:flex;align-items:center;gap:12px;background:rgba(8,10,15,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.05)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:19px;letter-spacing:-.4px}
+.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;box-shadow:0 7px 25px rgba(255,49,88,.25)}
+.logo:after{content:"";width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid white;margin-left:2px}
+.top-spacer{flex:1}
+.icon-btn{width:38px;height:38px;border-radius:12px;background:transparent;display:grid;place-items:center;font-size:19px}
+.icon-btn:active,.nav-item:active,.action:active,.chip:active{transform:scale(.94)}
+.page{display:none;padding-bottom:92px;animation:fade .18s ease}
+.page.active{display:block}
+@keyframes fade{from{opacity:.4;transform:translateY(5px)}to{opacity:1;transform:none}}
+.hero-search{margin:14px 16px 10px;height:44px;border:1px solid var(--line);background:var(--panel);border-radius:15px;display:flex;align-items:center;padding:0 13px;gap:9px;color:var(--muted)}
+.hero-search input{width:100%;border:0;outline:0;background:transparent;color:var(--text);font-size:14px}
+.chips{display:flex;gap:8px;overflow:auto;padding:4px 16px 13px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;padding:9px 14px;border-radius:999px;background:var(--panel);color:#c3c9d4;font-size:12px;font-weight:700;border:1px solid var(--line)}
+.chip.active{background:var(--text);color:#080a0f;border-color:var(--text)}
+.section-head{display:flex;justify-content:space-between;align-items:center;padding:7px 16px 10px}
+.section-head h2{font-size:17px;margin:0;letter-spacing:-.3px}
+.section-head span{font-size:12px;color:var(--accent);font-weight:700}
+.feed{display:grid;gap:18px}
+.card{padding:0 16px}
+.thumb{position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#151a23;border:1px solid rgba(255,255,255,.06)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.play{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(transparent 45%,rgba(0,0,0,.42));}
+.play span{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);font-size:19px;padding-left:3px}
+.duration{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.78);padding:4px 6px;border-radius:6px;font-size:10px;font-weight:700}
+.card-info{display:flex;gap:10px;padding:10px 2px 0}
+.avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;flex:0 0 34px}
+.card-info h3{font-size:14px;line-height:1.35;margin:0 0 4px;font-weight:750}
+.meta{font-size:11px;color:var(--muted)}
+.more{margin-left:auto;color:var(--muted);font-size:19px}
+.watch{padding-bottom:30px}
+.player{width:100%;aspect-ratio:16/9;background:#000}
+.player iframe{width:100%;height:100%;border:0;display:block}
+.watch-content{padding:15px 16px}
+.watch-title{font-size:18px;line-height:1.3;margin:0 0 7px}
+.watch-meta{font-size:12px;color:var(--muted)}
+.actions{display:flex;gap:8px;overflow:auto;margin:15px 0 18px}
+.action{flex:0 0 auto;min-width:68px;padding:9px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:11px;font-weight:700}
+.channel{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.channel-info{flex:1}
+.channel-name{font-weight:750;font-size:13px}
+.subs{font-size:11px;color:var(--muted);margin-top:2px}
+.subscribe{background:var(--accent);padding:10px 15px;border-radius:11px;font-size:11px;font-weight:800}
+.comment{background:var(--panel);border:1px solid var(--line);padding:12px;border-radius:14px;margin-top:12px}
+.comment strong{font-size:12px}.comment p{margin:6px 0 0;font-size:12px;color:#c4cad5;line-height:1.45}
+.shorts-wrap{height:calc(100vh - 64px);min-height:600px;background:#000;position:relative;overflow:hidden}
+.short-slide{height:100%;position:relative;display:none}
+.short-slide.active{display:block}
+.short-slide img{width:100%;height:100%;object-fit:cover}
+.short-gradient{position:absolute;inset:0;background:linear-gradient(transparent 35%,rgba(0,0,0,.82))}
+.short-info{position:absolute;left:16px;right:70px;bottom:25px}
+.short-info h2{font-size:16px;margin:0 0 7px}.short-info p{font-size:12px;margin:0;color:#ddd}
+.short-actions{position:absolute;right:12px;bottom:25px;display:grid;gap:14px}
+.short-action{text-align:center;font-size:10px;color:white}.short-action b{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);font-size:18px;margin-bottom:4px}
+.search-box{margin:16px;height:48px;border:1px solid var(--line);background:var(--panel);border-radius:15px;display:flex;align-items:center;padding:0 14px;gap:10px}
+.search-box input{flex:1;background:none;border:0;outline:0;color:var(--text);font-size:14px}
+.results{display:grid;gap:14px}.result{display:flex;gap:10px;padding:0 16px}.result img{width:125px;height:75px;object-fit:cover;border-radius:11px}.result h3{font-size:13px;margin:0 0 5px;line-height:1.3}.result p{font-size:10px;color:var(--muted);margin:0}
+.grid-cats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}.cat{height:90px;border-radius:16px;padding:13px;display:flex;align-items:flex-end;font-weight:800;font-size:13px;background:linear-gradient(135deg,#1d2635,#11141b);border:1px solid var(--line)}
+.cat:nth-child(2){background:linear-gradient(135deg,#39243b,#15121a)}.cat:nth-child(3){background:linear-gradient(135deg,#243d31,#101713)}.cat:nth-child(4){background:linear-gradient(135deg,#392e20,#15120d)}
+.upload{padding:18px 16px}.upload-box{border:1px dashed #394150;background:var(--panel);border-radius:18px;padding:32px 18px;text-align:center}.upload-icon{font-size:34px}.upload-box h2{margin:8px 0 5px;font-size:18px}.upload-box p{margin:0;color:var(--muted);font-size:12px}.field{margin-top:13px}.field label{display:block;font-size:11px;color:#aab2c0;margin:0 0 6px}.field input,.field textarea,.field select{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:13px;color:var(--text);padding:12px;outline:none}.field textarea{min-height:90px;resize:none}.primary{width:100%;margin-top:16px;padding:13px;border-radius:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:800}
+.profile-head{margin:16px;padding:22px 16px;border-radius:20px;background:linear-gradient(135deg,#252b39,#151821);text-align:center}.profile-head .avatar{width:72px;height:72px;margin:auto}.profile-head h2{margin:9px 0 2px;font-size:19px}.profile-head p{margin:0;color:var(--muted);font-size:12px}.stats{display:flex;justify-content:center;gap:35px;margin-top:16px}.stat b{display:block;font-size:16px}.stat span{font-size:10px;color:var(--muted)}
+.library-list{padding:0 16px;display:grid;gap:9px}.lib-item{display:flex;align-items:center;gap:13px;padding:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.lib-icon{width:38px;height:38px;border-radius:11px;background:#1d2330;display:grid;place-items:center}.lib-item div:last-child{font-size:13px;font-weight:700}.lib-item small{display:block;color:var(--muted);font-weight:400;margin-top:3px}
+.nav{position:fixed;z-index:40;bottom:0;left:50%;transform:translateX(-50%);width:min(560px,100%);padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:rgba(12,14,20,.94);backdrop-filter:blur(18px);border-top:1px solid rgba(255,255,255,.07);display:grid;grid-template-columns:repeat(5,1fr)}
+.nav-item{background:transparent;text-align:center;color:#778091;font-size:10px;padding:4px 0}
+.nav-item .ni{font-size:19px;line-height:20px;display:block;margin-bottom:3px}.nav-item.active{color:#fff}
+.nav-item.upload-nav .ni{width:42px;height:42px;margin:-8px auto 1px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:white;font-size:25px;box-shadow:0 7px 22px rgba(255,49,88,.22)}
+
+/* ===== CMS ADMIN ===== */
+.admin-login{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.78);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:20px}
+.admin-login.show{display:flex}
+.login-card{width:100%;max-width:390px;background:#11141b;border:1px solid #2a303c;border-radius:22px;padding:24px;box-shadow:0 25px 80px rgba(0,0,0,.55)}
+.login-logo{margin:0 auto 12px}
+.login-card h2{text-align:center;margin:8px 0 5px;font-size:20px}
+.login-card p{text-align:center;color:#8f98a8;font-size:12px;margin:0 0 20px}
+.pin-input{width:100%;height:50px;text-align:center;letter-spacing:8px;font-size:21px;background:#080a0f;border:1px solid #303746;border-radius:14px;color:#fff;outline:none}
+.login-actions{display:flex;gap:8px;margin-top:12px}
+.login-actions button{flex:1;padding:12px;border-radius:12px;font-weight:800}
+.cancel-btn{background:#202530}
+.login-btn{background:linear-gradient(135deg,#ff3158,#ff6a3d)}
+.login-error{height:18px;text-align:center;color:#ff657f;font-size:11px;margin-top:8px}
+.admin-panel{position:fixed;inset:0;z-index:80;background:#080a0f;display:none;overflow:auto}
+.admin-panel.show{display:block}
+.admin-wrap{width:100%;max-width:760px;margin:auto;min-height:100vh}
+.admin-top{position:sticky;top:0;z-index:5;height:62px;display:flex;align-items:center;padding:10px 16px;background:rgba(8,10,15,.94);backdrop-filter:blur(16px);border-bottom:1px solid #222832}
+.admin-title{font-weight:850;font-size:17px}
+.admin-spacer{flex:1}
+.admin-top button{background:#171b24;border:1px solid #292f3b;padding:9px 12px;border-radius:11px;font-size:11px;font-weight:800}
+.admin-body{padding:16px 16px 40px}
+.admin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+.admin-stat{background:#11141b;border:1px solid #252b36;border-radius:16px;padding:15px}
+.admin-stat b{font-size:23px;display:block}.admin-stat span{font-size:10px;color:#8f98a8}
+.admin-tabs{display:flex;gap:7px;overflow:auto;margin:0 0 16px;scrollbar-width:none}
+.admin-tabs::-webkit-scrollbar{display:none}
+.admin-tab{white-space:nowrap;background:#141821;border:1px solid #272e39;padding:9px 13px;border-radius:999px;color:#9da6b5;font-size:11px;font-weight:800}
+.admin-tab.active{background:#fff;color:#080a0f}
+.admin-section{display:none}.admin-section.active{display:block}
+.admin-section-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}.admin-section-head h3{margin:0;font-size:16px}.admin-section-head button{margin-left:auto;background:#ff3158;padding:10px 12px;border-radius:11px;font-size:11px;font-weight:850}
+.admin-video{display:flex;gap:10px;background:#11141b;border:1px solid #252b36;border-radius:14px;padding:10px;margin-bottom:9px}
+.admin-video img{width:105px;height:63px;object-fit:cover;border-radius:9px}
+.admin-video-main{min-width:0;flex:1}.admin-video-main strong{display:block;font-size:12px;line-height:1.35}.admin-video-main small{display:block;color:#8f98a8;font-size:10px;margin-top:4px}
+.admin-video-actions{display:flex;gap:6px;margin-top:7px}.admin-video-actions button{font-size:10px;background:#202530;padding:6px 9px;border-radius:8px}.admin-video-actions .danger{color:#ff6c83}
+.cms-form{background:#11141b;border:1px solid #252b36;border-radius:17px;padding:14px;margin-bottom:14px}
+.cms-form .field{margin-top:11px}
+.cms-form .field:first-child{margin-top:0}
+.cms-form label{display:block;font-size:10px;color:#9da6b5;margin-bottom:5px}
+.cms-form input,.cms-form textarea,.cms-form select{width:100%;background:#080a0f;border:1px solid #2a303b;color:#fff;border-radius:11px;padding:11px;outline:none}
+.cms-form textarea{min-height:80px;resize:vertical}
+.cms-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cms-save{width:100%;background:linear-gradient(135deg,#ff3158,#ff6a3d);padding:12px;border-radius:11px;font-weight:850;margin-top:12px}
+.cms-secondary{width:100%;background:#202530;padding:12px;border-radius:11px;font-weight:750;margin-top:7px}
+.category-row{display:flex;align-items:center;gap:9px;background:#11141b;border:1px solid #252b36;border-radius:13px;padding:11px;margin-bottom:8px}
+.category-row span{flex:1;font-size:12px;font-weight:700}.category-row button{background:#202530;border-radius:8px;padding:7px 9px;font-size:10px}
+.admin-note{font-size:10px;color:#8f98a8;line-height:1.5;background:#11141b;border:1px solid #252b36;border-radius:14px;padding:12px;margin-top:14px}
+.admin-empty{padding:25px 10px;text-align:center;color:#8f98a8;font-size:12px}
+@media(min-width:700px){.admin-body{padding-left:22px;padding-right:22px}}
+
+.toast{position:fixed;z-index:100;left:50%;bottom:92px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#fff;color:#10131a;padding:10px 14px;border-radius:12px;font-size:12px;font-weight:750;transition:.25s;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(min-width:700px){body{background:#020306}.app{box-shadow:0 0 60px rgba(0,0,0,.6)}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div class="logo"></div><span>VideoShare</span></div>
+  <div class="top-spacer"></div>
+  <button class="icon-btn" onclick="openPage('search')">⌕</button>
+  <button class="icon-btn" onclick="openAdminLogin()" aria-label="Admin">⚙</button>
+</header>
+
+<main>
+<section id="home" class="page active">
+  <div class="hero-search" onclick="openPage('search')">⌕ <input readonly placeholder="Search videos..." /></div>
+  <div class="chips">
+    <button class="chip active" onclick="filterVideos('All',this)">For You</button>
+    <button class="chip" onclick="filterVideos('Trending',this)">Trending</button>
+    <button class="chip" onclick="filterVideos('Music',this)">Music</button>
+    <button class="chip" onclick="filterVideos('Travel',this)">Travel</button>
+    <button class="chip" onclick="filterVideos('Gaming',this)">Gaming</button>
+  </div>
+  <div class="section-head"><h2>Recommended</h2><span>View all</span></div>
+  <div id="feed" class="feed"></div>
+</section>
+
+<section id="watch" class="page">
+  <div class="watch">
+    <div class="player"><iframe id="yt" src="" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+    <div class="watch-content">
+      <h1 id="watchTitle" class="watch-title"></h1>
+      <div id="watchMeta" class="watch-meta"></div>
+      <div class="actions">
+        <button class="action" onclick="toast('Liked ❤️')">♡ Like</button>
+        <button class="action" onclick="toast('Share link copied')">↗ Share</button>
+        <button class="action" onclick="toast('Saved to Library')">＋ Save</button>
+        <button class="action" onclick="toast('More options')">••• More</button>
+      </div>
+      <div class="channel">
+        <img id="watchAvatar" class="avatar" src="" alt="">
+        <div class="channel-info"><div id="watchChannel" class="channel-name"></div><div class="subs">125K subscribers</div></div>
+        <button class="subscribe" onclick="toast('Subscribed ✓')">Subscribe</button>
+      </div>
+      <div class="comment"><strong>Juan</strong><p>This video is amazing! 🔥</p></div>
+      <div class="section-head" style="padding-left:0;padding-right:0;margin-top:18px"><h2>Up next</h2></div>
+      <div id="upnext" class="feed"></div>
+    </div>
+  </div>
+</section>
+
+<section id="shorts" class="page">
+  <div class="shorts-wrap">
+    <div class="short-slide active"><img src="https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=85" alt=""><div class="short-gradient"></div><div class="short-info"><h2>Beautiful places are waiting 🌴</h2><p>@TravelDaily • Original sound</p></div><div class="short-actions"><div class="short-action"><b>♡</b>18K</div><div class="short-action"><b>○</b>524</div><div class="short-action"><b>↗</b>Share</div></div></div>
+    <div class="short-slide"><img src="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=900&q=85" alt=""><div class="short-gradient"></div><div class="short-info"><h2>Too cute not to share 🐱</h2><p>@CutePetsPH • Original sound</p></div><div class="short-actions"><div class="short-action"><b>♡</b>42K</div><div class="short-action"><b>○</b>1.2K</div><div class="short-action"><b>↗</b>Share</div></div></div>
+  </div>
+</section>
+
+<section id="search" class="page">
+  <div class="search-box">⌕ <input id="searchInput" type="search" placeholder="Search videos or channels..." oninput="doSearch()"></div>
+  <div class="section-head"><h2>Search results</h2></div>
+  <div id="results" class="results"></div>
+</section>
+
+<section id="explore" class="page">
+  <div class="section-head"><h2>Explore</h2></div>
+  <div class="grid-cats">
+    <button class="cat" onclick="toast('Music selected')">🎵 Music</button>
+    <button class="cat" onclick="toast('Gaming selected')">🎮 Gaming</button>
+    <button class="cat" onclick="toast('Travel selected')">🌴 Travel</button>
+    <button class="cat" onclick="toast('Food selected')">🍜 Food</button>
+    <button class="cat" onclick="toast('Tutorial selected')">💡 Tutorials</button>
+    <button class="cat" onclick="toast('Funny selected')">😂 Funny</button>
+  </div>
+</section>
+
+<section id="upload" class="page">
+  <div class="upload">
+    <div class="upload-box"><div class="upload-icon">☁</div><h2>Share your video</h2><p>Simple and easy. Add your video details below.</p><button class="primary" onclick="document.getElementById('file').click()">Select Video</button><input id="file" type="file" accept="video/*" hidden onchange="toast(this.files[0]?.name || 'Video selected')"></div>
+    <div class="field"><label>Title</label><input placeholder="Give your video a catchy title"></div>
+    <div class="field"><label>Description</label><textarea placeholder="Tell something about your video..."></textarea></div>
+    <div class="field"><label>Category</label><select><option>Entertainment</option><option>Music</option><option>Gaming</option><option>Travel</option><option>Tutorial</option></select></div>
+    <button class="primary" onclick="toast('Demo upload — connect a backend later')">Upload Video</button>
+  </div>
+</section>
+
+<section id="subs" class="page">
+  <div class="section-head"><h2>Subscriptions</h2></div>
+  <div class="library-list">
+    <div class="lib-item"><img class="avatar" src="https://i.pravatar.cc/100?img=12"><div>Travel Daily<small>2 new videos</small></div></div>
+    <div class="lib-item"><img class="avatar" src="https://i.pravatar.cc/100?img=33"><div>Tech World<small>1 new video</small></div></div>
+    <div class="lib-item"><img class="avatar" src="https://i.pravatar.cc/100?img=47"><div>Music Vibes<small>4 new videos</small></div></div>
+    <div class="lib-item"><img class="avatar" src="https://i.pravatar.cc/100?img=8"><div>Foodie Guy<small>3 new videos</small></div></div>
+  </div>
+</section>
+
+<section id="library" class="page">
+  <div class="section-head"><h2>Library</h2></div>
+  <div class="library-list">
+    <button class="lib-item" onclick="toast('Opening history')"><span class="lib-icon">◷</span><div>History<small>Recently watched videos</small></div></button>
+    <button class="lib-item" onclick="toast('Opening saved videos')"><span class="lib-icon">▣</span><div>Saved videos<small>12 videos</small></div></button>
+    <button class="lib-item" onclick="toast('Opening liked videos')"><span class="lib-icon">♡</span><div>Liked videos<small>128 videos</small></div></button>
+    <button class="lib-item" onclick="toast('Opening playlists')"><span class="lib-icon">☷</span><div>Playlists<small>3 playlists</small></div></button>
+  </div>
+</section>
+
+<section id="profile" class="page">
+  <div class="profile-head"><img class="avatar" src="https://i.pravatar.cc/200?img=12" alt=""><h2>Jan Tech</h2><p>@jantech • Sharing tech, tutorials and life</p><div class="stats"><div class="stat"><b>45</b><span>Videos</span></div><div class="stat"><b>1.2K</b><span>Subscribers</span></div><div class="stat"><b>340</b><span>Following</span></div></div></div>
+  <div class="section-head"><h2>My videos</h2><span>Edit profile</span></div>
+  <div id="profileFeed" class="feed"></div>
+</section>
+</main>
+
+<nav class="nav">
+  <button class="nav-item active" data-page="home" onclick="openPage('home')"><span class="ni">⌂</span>Home</button>
+  <button class="nav-item" data-page="shorts" onclick="openPage('shorts')"><span class="ni">▶</span>Shorts</button>
+  <button class="nav-item upload-nav" data-page="upload" onclick="openPage('upload')"><span class="ni">+</span>Upload</button>
+  <button class="nav-item" data-page="subs" onclick="openPage('subs')"><span class="ni">♧</span>Subs</button>
+  <button class="nav-item" data-page="library" onclick="openPage('library')"><span class="ni">▣</span>Library</button>
+</nav>
+
+<!-- ===== ADMIN LOGIN ===== -->
+<div id="adminLogin" class="admin-login" onclick="if(event.target===this)closeAdminLogin()">
+  <div class="login-card">
+    <div class="logo login-logo"></div>
+    <h2>CMS Admin</h2>
+    <p>Enter the admin PIN to manage videos and categories.</p>
+    <input id="adminPin" class="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" onkeydown="if(event.key==='Enter')loginAdmin()">
+    <div id="loginError" class="login-error"></div>
+    <div class="login-actions">
+      <button class="cancel-btn" onclick="closeAdminLogin()">Cancel</button>
+      <button class="login-btn" onclick="loginAdmin()">Unlock CMS</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN DASHBOARD ===== -->
+<div id="adminPanel" class="admin-panel">
+  <div class="admin-wrap">
+    <header class="admin-top">
+      <div class="admin-title">VideoShare CMS</div>
+      <div class="admin-spacer"></div>
+      <button onclick="closeAdmin()">View Site</button>
+      <button onclick="logoutAdmin()">Logout</button>
+    </header>
+
+    <div class="admin-body">
+      <div class="admin-grid">
+        <div class="admin-stat"><b id="statVideos">0</b><span>Total Videos</span></div>
+        <div class="admin-stat"><b id="statViews">0</b><span>Total Views</span></div>
+        <div class="admin-stat"><b id="statCategories">0</b><span>Categories</span></div>
+        <div class="admin-stat"><b id="statStorage">Local</b><span>Storage Mode</span></div>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="adminTab('videos',this)">Videos</button>
+        <button class="admin-tab" onclick="adminTab('add',this)">Add Video</button>
+        <button class="admin-tab" onclick="adminTab('categories',this)">Categories</button>
+        <button class="admin-tab" onclick="adminTab('settings',this)">Settings</button>
+      </div>
+
+      <section id="adminVideos" class="admin-section active">
+        <div class="admin-section-head"><h3>Video Library</h3><button onclick="adminTab('add',document.querySelectorAll('.admin-tab')[1])">+ Add Video</button></div>
+        <div id="adminVideoList"></div>
+      </section>
+
+      <section id="adminAdd" class="admin-section">
+        <div class="admin-section-head"><h3 id="formHeading">Add Video</h3></div>
+        <form class="cms-form" onsubmit="saveVideo(event)">
+          <input id="editVideoIndex" type="hidden" value="-1">
+          <div class="field"><label>Video Title</label><input id="cmsTitle" required placeholder="Example: Beautiful Philippines"></div>
+          <div class="field"><label>YouTube Video ID</label><input id="cmsYoutube" required placeholder="Example: dQw4w9WgXcQ"></div>
+          <div class="cms-row">
+            <div class="field"><label>Channel</label><input id="cmsChannel" required placeholder="Channel name"></div>
+            <div class="field"><label>Category</label><select id="cmsCategory"></select></div>
+          </div>
+          <div class="cms-row">
+            <div class="field"><label>Views</label><input id="cmsViews" placeholder="12K"></div>
+            <div class="field"><label>Duration</label><input id="cmsDuration" placeholder="04:20"></div>
+          </div>
+          <div class="field"><label>Thumbnail URL</label><input id="cmsImg" placeholder="https://...jpg"></div>
+          <div class="field"><label>Avatar URL</label><input id="cmsAvatar" placeholder="https://...jpg"></div>
+          <div class="field"><label>Description</label><textarea id="cmsDescription" placeholder="Optional video description"></textarea></div>
+          <button class="cms-save" type="submit">Save Video</button>
+          <button class="cms-secondary" type="button" onclick="resetVideoForm();adminTab('videos',document.querySelectorAll('.admin-tab')[0])">Cancel</button>
+        </form>
+      </section>
+
+      <section id="adminCategories" class="admin-section">
+        <div class="admin-section-head"><h3>Categories</h3><button onclick="addCategory()">+ Add</button></div>
+        <div id="categoryList"></div>
+        <div class="admin-note">Categories are stored in this browser. They control the category selector and feed filters in this single-file version.</div>
+      </section>
+
+      <section id="adminSettings" class="admin-section">
+        <div class="cms-form">
+          <div class="field"><label>App Name</label><input id="cmsAppName" value="VideoShare"></div>
+          <div class="field"><label>Admin PIN</label><input id="cmsPinChange" type="password" inputmode="numeric" maxlength="6" placeholder="Current PIN is hidden"></div>
+          <button class="cms-save" type="button" onclick="saveSettings()">Save Settings</button>
+        </div>
+        <div class="admin-note">
+          <b>Watch-only user mode</b><br>
+          Regular users only see the public video interface. CMS access is protected by the PIN in this demo.
+          <br><br>
+          <b>Important:</b> because this is a single HTML file with no server, the PIN and video management are client-side and are not a secure production authentication system. For real public deployment, move the CMS authentication and database to a server/Supabase/Firebase backend.
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const DEFAULT_VIDEOS=[
+ {id:"6oSTMSKSJsA",title:"Tiktok with Harold 🌄",channel:"Kapten's Vlog",views:"12",time:"2 days ago",duration:"04:12",cat:"Travel",img:"https://i9.ytimg.com/vi_webp/6oSTMSKSJsA/mq2.webp?sqp=COzUttQG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGGUgTShIMA8=&rs=AOn4CLDTtnr0C1zfkP69EWw8UZpYt-UbNA",avatar:"https://i.pravatar.cc/100?img=12"},
+ {id:"M7lc1UVf-VE",title:"Simple Tech Tips You Should Know",channel:"Tech World",views:"58K",time:"1 day ago",duration:"08:20",cat:"Trending",img:"https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=85",avatar:"https://i.pravatar.cc/100?img=33"},
+ {id:"ScMzIvxBSi4",title:"Relaxing Music for Your Day 🎵",channel:"Music Vibes",views:"82K",time:"5 hours ago",duration:"12:45",cat:"Music",img:"https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1000&q=85",avatar:"https://i.pravatar.cc/100?img=47"},
+ {id:"aqz-KE-bpKQ",title:"Easy Gaming Setup for Beginners",channel:"Gaming Pro",views:"41K",time:"3 days ago",duration:"06:31",cat:"Gaming",img:"https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=1000&q=85",avatar:"https://i.pravatar.cc/100?img=8"},
+ {id:"ysz5S6PUM-U",title:"Street Food You Must Try",channel:"Foodie Guy",views:"96K",time:"1 week ago",duration:"05:18",cat:"Trending",img:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1000&q=85",avatar:"https://i.pravatar.cc/100?img=22"}
+];
+let videos=JSON.parse(localStorage.getItem("videoshare_videos")||"null") || DEFAULT_VIDEOS;
+let categories=JSON.parse(localStorage.getItem("videoshare_categories")||"null") || ["All","Trending","Music","Travel","Gaming","Food","Tutorial"];
+let adminPin=localStorage.getItem("videoshare_admin_pin") || "833981";
+let appName=localStorage.getItem("videoshare_app_name") || "VideoShare";
+
+function card(v){
+ return `<article class="card" data-cat="${v.cat}">
+   <button class="thumb" onclick="watch('${v.id}')"><img src="${v.img}" alt=""><span class="play"><span>▶</span></span><b class="duration">${v.duration}</b></button>
+   <div class="card-info"><img class="avatar" src="${v.avatar}" alt=""><div><h3>${v.title}</h3><div class="meta">${v.channel} • ${v.views} views • ${v.time}</div></div><button class="more" onclick="toast('More options')">⋮</button></div>
+ </article>`;
+}
+function renderFeed(list=videos){document.getElementById('feed').innerHTML=list.map(card).join("");document.getElementById('profileFeed').innerHTML=list.slice(0,3).map(card).join("");document.getElementById('results').innerHTML=list.map(result).join("");}
+function result(v){return `<button class="result" onclick="watch('${v.id}')"><img src="${v.img}" alt=""><div><h3>${v.title}</h3><p>${v.channel} • ${v.views} views • ${v.time}</p></div></button>`}
+function watch(id){
+ const v=videos.find(x=>x.id===id)||videos[0];
+ document.getElementById('yt').src=`https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1`;
+ document.getElementById('watchTitle').textContent=v.title;
+ document.getElementById('watchMeta').textContent=`${v.views} views • ${v.time}`;
+ document.getElementById('watchChannel').textContent=v.channel;
+ document.getElementById('watchAvatar').src=v.avatar;
+ document.getElementById('upnext').innerHTML=videos.filter(x=>x.id!==v.id).slice(0,3).map(card).join("");
+ openPage('watch',false);
+}
+function openPage(id,nav=true){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===id));
+ if(nav && id!=="watch") window.scrollTo({top:0,behavior:"smooth"});
+}
+function filterVideos(cat,el){
+ document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));el.classList.add('active');
+ renderFeed(cat==="All"?videos:videos.filter(v=>v.cat===cat));
+}
+function doSearch(){
+ const q=document.getElementById('searchInput').value.toLowerCase().trim();
+ document.getElementById('results').innerHTML=(q?videos.filter(v=>(v.title+" "+v.channel+" "+v.cat).toLowerCase().includes(q)):videos).map(result).join("")||`<div style="padding:20px 16px;color:var(--muted);font-size:13px">No videos found.</div>`;
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>t.classList.remove('show'),1800)}
+
+function persistVideos(){localStorage.setItem("videoshare_videos",JSON.stringify(videos));}
+function persistCategories(){localStorage.setItem("videoshare_categories",JSON.stringify(categories));}
+function refreshPublicUI(){
+  renderFeed();
+  document.querySelector(".brand span").textContent=appName;
+  const chips=document.querySelector(".chips");
+  if(chips){
+    chips.innerHTML=categories.map((c,i)=>`<button class="chip ${i===0?"active":""}" onclick="filterVideos('${c.replace(/'/g,"\\'")}',this)">${c}</button>`).join("");
+  }
+  populateCategorySelect();
+}
+function openAdminLogin(){
+  document.getElementById("adminLogin").classList.add("show");
+  document.getElementById("adminPin").value="";
+  document.getElementById("loginError").textContent="";
+  setTimeout(()=>document.getElementById("adminPin").focus(),80);
+}
+function closeAdminLogin(){document.getElementById("adminLogin").classList.remove("show")}
+function loginAdmin(){
+  const entered=document.getElementById("adminPin").value;
+  if(entered===adminPin){
+    closeAdminLogin();
+    document.getElementById("adminPanel").classList.add("show");
+    document.body.style.overflow="hidden";
+    renderAdmin();
+    toast("CMS unlocked");
+  }else{
+    document.getElementById("loginError").textContent="Incorrect PIN";
+  }
+}
+function closeAdmin(){
+  document.getElementById("adminPanel").classList.remove("show");
+  document.body.style.overflow="";
+  openPage("home");
+}
+function logoutAdmin(){closeAdmin();toast("Admin logged out")}
+function adminTab(id,el){
+  document.querySelectorAll(".admin-section").forEach(x=>x.classList.remove("active"));
+  document.getElementById("admin"+id.charAt(0).toUpperCase()+id.slice(1)).classList.add("active");
+  document.querySelectorAll(".admin-tab").forEach(x=>x.classList.remove("active"));
+  if(el)el.classList.add("active");
+}
+function renderAdmin(){
+  document.getElementById("statVideos").textContent=videos.length;
+  const total=videos.reduce((sum,v)=>{
+    const s=String(v.views||"0").toUpperCase();
+    const n=parseFloat(s)||0;
+    return sum+(s.includes("M")?n*1000000:s.includes("K")?n*1000:n);
+  },0);
+  document.getElementById("statViews").textContent=total>=1000000?(total/1000000).toFixed(1)+"M":total>=1000?Math.round(total/1000)+"K":Math.round(total);
+  document.getElementById("statCategories").textContent=Math.max(0,categories.length-1);
+  document.getElementById("statStorage").textContent="Local";
+  document.getElementById("adminVideoList").innerHTML=videos.length?videos.map((v,i)=>`
+    <div class="admin-video">
+      <img src="${v.img}" alt="">
+      <div class="admin-video-main">
+        <strong>${escapeHtml(v.title)}</strong>
+        <small>${escapeHtml(v.channel)} • ${escapeHtml(v.cat)} • ${escapeHtml(v.views||"0")} views</small>
+        <div class="admin-video-actions">
+          <button onclick="editVideo(${i})">Edit</button>
+          <button onclick="previewAdminVideo(${i})">Preview</button>
+          <button class="danger" onclick="deleteVideo(${i})">Delete</button>
+        </div>
+      </div>
+    </div>`).join(""):`<div class="admin-empty">No videos yet. Add your first YouTube video.</div>`;
+  renderCategories();
+  populateCategorySelect();
+}
+function escapeHtml(s){
+  return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+function populateCategorySelect(){
+  const sel=document.getElementById("cmsCategory");
+  if(sel)sel.innerHTML=categories.filter(c=>c!=="All").map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+}
+function resetVideoForm(){
+  document.getElementById("editVideoIndex").value="-1";
+  document.getElementById("formHeading").textContent="Add Video";
+  ["cmsTitle","cmsYoutube","cmsChannel","cmsViews","cmsDuration","cmsImg","cmsAvatar","cmsDescription"].forEach(id=>document.getElementById(id).value="");
+  populateCategorySelect();
+}
+function saveVideo(e){
+  e.preventDefault();
+  const idx=Number(document.getElementById("editVideoIndex").value);
+  const item={
+    id:document.getElementById("cmsYoutube").value.trim().replace(/^.*(?:v=|youtu\.be\/|embed\/)/,"").split(/[?&]/)[0],
+    title:document.getElementById("cmsTitle").value.trim(),
+    channel:document.getElementById("cmsChannel").value.trim(),
+    views:document.getElementById("cmsViews").value.trim()||"0",
+    time:idx>=0?(videos[idx].time||"just now"):"just now",
+    duration:document.getElementById("cmsDuration").value.trim()||"00:00",
+    cat:document.getElementById("cmsCategory").value,
+    img:document.getElementById("cmsImg").value.trim()||`https://img.youtube.com/vi/${document.getElementById("cmsYoutube").value.trim()}/hqdefault.jpg`,
+    avatar:document.getElementById("cmsAvatar").value.trim()||"https://i.pravatar.cc/100?img=12",
+    description:document.getElementById("cmsDescription").value.trim()
+  };
+  if(!item.id){toast("Enter a valid YouTube ID");return}
+  if(idx>=0)videos[idx]=item;else videos.unshift(item);
+  persistVideos();refreshPublicUI();renderAdmin();resetVideoForm();
+  adminTab("videos",document.querySelectorAll(".admin-tab")[0]);
+  toast(idx>=0?"Video updated ✓":"Video added ✓");
+}
+function editVideo(i){
+  const v=videos[i];
+  document.getElementById("editVideoIndex").value=i;
+  document.getElementById("formHeading").textContent="Edit Video";
+  document.getElementById("cmsTitle").value=v.title||"";
+  document.getElementById("cmsYoutube").value=v.id||"";
+  document.getElementById("cmsChannel").value=v.channel||"";
+  document.getElementById("cmsViews").value=v.views||"";
+  document.getElementById("cmsDuration").value=v.duration||"";
+  document.getElementById("cmsImg").value=v.img||"";
+  document.getElementById("cmsAvatar").value=v.avatar||"";
+  document.getElementById("cmsDescription").value=v.description||"";
+  populateCategorySelect();
+  document.getElementById("cmsCategory").value=v.cat||categories[1]||"Trending";
+  adminTab("add",document.querySelectorAll(".admin-tab")[1]);
+}
+function deleteVideo(i){
+  if(!confirm(`Delete "${videos[i].title}"?`))return;
+  videos.splice(i,1);persistVideos();refreshPublicUI();renderAdmin();toast("Video deleted");
+}
+function previewAdminVideo(i){closeAdmin();watch(videos[i].id)}
+function renderCategories(){
+  document.getElementById("categoryList").innerHTML=categories.filter(c=>c!=="All").map((c,i)=>`
+    <div class="category-row"><span>${escapeHtml(c)}</span><button onclick="renameCategory('${c.replace(/'/g,"\\'")}')">Rename</button><button onclick="deleteCategory('${c.replace(/'/g,"\\'")}')">Delete</button></div>`).join("");
+}
+function addCategory(){
+  const name=prompt("Category name:");
+  if(!name)return;
+  const clean=name.trim();
+  if(!clean)return;
+  if(categories.some(c=>c.toLowerCase()===clean.toLowerCase())){toast("Category already exists");return}
+  categories.push(clean);persistCategories();refreshPublicUI();renderAdmin();toast("Category added");
+}
+function renameCategory(oldName){
+  const name=prompt("New category name:",oldName);
+  if(!name)return;
+  const clean=name.trim();
+  if(!clean||categories.includes(clean))return;
+  categories=categories.map(c=>c===oldName?clean:c);
+  videos=videos.map(v=>v.cat===oldName?{...v,cat:clean}:v);
+  persistCategories();persistVideos();refreshPublicUI();renderAdmin();toast("Category renamed");
+}
+function deleteCategory(name){
+  if(!confirm(`Delete category "${name}"? Videos in it will move to Trending.`))return;
+  categories=categories.filter(c=>c!==name);
+  videos=videos.map(v=>v.cat===name?{...v,cat:"Trending"}:v);
+  if(!categories.includes("Trending"))categories.splice(1,0,"Trending");
+  persistCategories();persistVideos();refreshPublicUI();renderAdmin();toast("Category deleted");
+}
+function saveSettings(){
+  const newName=document.getElementById("cmsAppName").value.trim()||"VideoShare";
+  const newPin=document.getElementById("cmsPinChange").value.trim();
+  appName=newName;
+  localStorage.setItem("videoshare_app_name",appName);
+  if(newPin){
+    if(!/^\d{6}$/.test(newPin)){toast("PIN must be 6 digits");return}
+    adminPin=newPin;localStorage.setItem("videoshare_admin_pin",adminPin);
+    document.getElementById("cmsPinChange").value="";
+  }
+  refreshPublicUI();toast("Settings saved ✓");
+}
+
+renderFeed();
+refreshPublicUI();
+
+let startY=0;
+const sw=document.querySelector('.shorts-wrap');
+sw.addEventListener('touchstart',e=>startY=e.touches[0].clientY,{passive:true});
+sw.addEventListener('touchend',e=>{
+ const dy=e.changedTouches[0].clientY-startY;
+ if(Math.abs(dy)<60)return;
+ const slides=[...document.querySelectorAll('.short-slide')], current=slides.findIndex(s=>s.classList.contains('active'));
+ slides[current].classList.remove('active');
+ slides[Math.max(0,Math.min(slides.length-1,current+(dy<0?1:-1)))].classList.add('active');
+},{passive:true});
+</script>
+</div>
+</body>
+</html>

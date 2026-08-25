@@ -236,9 +236,11 @@ function youtubeId(value){
  if(m)return m[1];
  return value.split(/[?&#]/)[0].replace(/[^A-Za-z0-9_-]/g,"");
 }
-function channelKey(name){return encodeURIComponent(String(name||""))}
+function channelKey(name){
+  return encodeURIComponent(String(name||"")).replace(/'/g,"%27");
+}
 function channelButton(v,extraClass=""){return `<button class="channel-link ${extraClass}" onclick="event.stopPropagation();openChannel('${channelKey(v.channel)}')"><img class="avatar" src="${escapeHtml(v.avatar||"https://i.pravatar.cc/100?img=12")}"><div class="channel-info"><div class="channel-name">${escapeHtml(v.channel)}</div><div class="subs">View channel</div></div></button>`}
-function card(v){return `<article class="card"><button class="thumb" onclick="watch('${escapeHtml(v.id)}')"><img src="${escapeHtml(v.img||`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`)}" onerror="this.src='https://i.ytimg.com/vi/${escapeHtml(v.id)}/hqdefault.jpg'"><span class="play"><span>▶</span></span><b class="duration">${escapeHtml(v.duration||"00:00")}</b></button><div class="card-info">${channelButton(v)}<div style="min-width:0;flex:1"><button onclick="watch('${escapeHtml(v.id)}')" style="background:none;text-align:left;padding:0;width:100%;color:inherit"><h3>${escapeHtml(v.title)}</h3></button><div class="meta">${escapeHtml(v.views||"0")} views • ${escapeHtml(v.time||"")}</div></div><button class="more" onclick="toast('More options')">⋮</button></div></article>`}
+function card(v){return `<article class="card"><button class="thumb" onclick="watch('${escapeHtml(v.id)}')"><img src="${escapeHtml(v.img||`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`)}" onerror="this.onerror=null;this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=640 height=360 viewBox=\'0 0 640 360\'%3E%3Crect width=\'640\' height=\'360\' fill=\'%23151a23\'/%3E%3Ctext x=\'320\' y=\'185\' text-anchor=\'middle\' fill=\'%238f98a8\' font-family=\'Arial\' font-size=\'22\'%3EVideo Thumbnail%3C/text%3E%3C/svg%3E'"><span class="play"><span>▶</span></span><b class="duration">${escapeHtml(v.duration||"00:00")}</b></button><div class="card-info">${channelButton(v)}<div style="min-width:0;flex:1"><button onclick="watch('${escapeHtml(v.id)}')" style="background:none;text-align:left;padding:0;width:100%;color:inherit"><h3>${escapeHtml(v.title)}</h3></button><div class="meta">${escapeHtml(v.views||"0")} views • ${escapeHtml(v.time||"")}</div></div><button class="more" onclick="toast('More options')">⋮</button></div></article>`}
 function result(v){return `<div class="result"><button onclick="watch('${escapeHtml(v.id)}')" style="background:none;padding:0"><img src="${escapeHtml(v.img||`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`)}"></button><div style="min-width:0;flex:1"><button onclick="watch('${escapeHtml(v.id)}')" style="background:none;text-align:left;padding:0;width:100%"><h3>${escapeHtml(v.title)}</h3></button><button onclick="openChannel('${channelKey(v.channel)}')" style="background:none;padding:0;text-align:left"><p>${escapeHtml(v.channel)} • ${escapeHtml(v.views||"0")} views • ${escapeHtml(v.time||"")} · <b style="color:var(--accent)">View channel</b></p></button></div></div>`}
 function renderFeed(list=videos){document.getElementById("feed").innerHTML=list.map(card).join("")||empty("No videos found.");document.getElementById("profileFeed").innerHTML=list.slice(0,3).map(card).join("");document.getElementById("profileCount").textContent=videos.length;document.getElementById("results").innerHTML=list.map(result).join("")}
 function empty(t){return `<div style="padding:20px 16px;color:var(--muted);font-size:13px">${t}</div>`}
@@ -342,7 +344,7 @@ function openSharedVideo(){
   const id=params.get("v");
   const channel=params.get("channel");
   if(id&&videos.some(v=>v.id===id))watch(id);
-  else if(channel)openChannel(encodeURIComponent(channel));
+  else if(channel)openChannel(channel);
 }
 window.addEventListener("popstate",()=>openSharedVideo());
 refreshPublicUI();

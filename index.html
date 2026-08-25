@@ -12,7 +12,7 @@
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><div class="logo"></div><span id="brandName">VideoShare</span></div><div class="top-spacer"></div><button class="icon-btn" onclick="openPage('search')">⌕</button><button class="icon-btn" onclick="openAdminLogin()">⚙</button></header>
+<header class="topbar"><div class="brand"><div class="logo"></div><span id="brandName">KaptenVideoShare</span></div><div class="top-spacer"></div><button class="icon-btn" onclick="openPage('search')">⌕</button><button class="icon-btn" onclick="openAdminLogin()">⚙</button></header>
 
 <main>
 <section id="home" class="page active">
@@ -101,7 +101,7 @@ const DEFAULT_VIDEOS=[
 let videos=JSON.parse(localStorage.getItem("videoshare_videos")||"null")||DEFAULT_VIDEOS;
 let categories=JSON.parse(localStorage.getItem("videoshare_categories")||"null")||["All","Trending","Music","Travel","Gaming","Food","Tutorial"];
 let adminPin=localStorage.getItem("videoshare_admin_pin")||"833981";
-let appName=localStorage.getItem("videoshare_app_name")||"VideoShare";
+let appName=localStorage.getItem("videoshare_app_name")||"KaptenVideoShare";
 let currentVideo=null;
 
 function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
